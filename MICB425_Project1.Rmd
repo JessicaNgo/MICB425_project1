@@ -1,10 +1,10 @@
 ---
 title: "MICB425_Project1"
-author: "Alison Fong 33399149"
+author: "Team 1: Albert Chang () Alison Fong (33399149) Karen Lau (16524143) Yaqian Luo (59751503) Jessica Ngo (31837131) Peter (Kiet) Truong (36645133)"
 date: '2018-03-16'
 output: 
-  html_document:
-    toc: true
+html_document:
+toc: true
 ---
 
 #Abstract
@@ -16,11 +16,13 @@ output:
 #Results
 
 ##Data Cleaning
-```{r loading packages}
-library(tidyverse)
-library(phyloseq)
-library(magrittr)
+```{r loading packages and data}
+library("tidyverse")
+library("phyloseq")
+library("magrittr")
 
+load("./mothur_phyloseq.RData")
+load("./qiime2_phyloseq.RData")
 ```
 
 ```{r, echo=FALSE}
@@ -29,13 +31,11 @@ knitr::opts_chunk$set(error = TRUE)
 
 ```{r data cleaning}
 #Mothur data
-load(file="mothur.RData")
 set.seed(4832)
 m.norm = rarefy_even_depth(mothur, sample.size=100000)
 m.perc = transform_sample_counts(m.norm, function(x) 100 * x/sum(x))
 
 #Qiime2 data
-load(file="qiime2.RData")
 set.seed(4832)
 q.norm = rarefy_even_depth(qiime2, sample.size=100000)
 q.perc = transform_sample_counts(q.norm, function(x) 100 * x/sum(x))
