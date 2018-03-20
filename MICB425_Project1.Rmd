@@ -1,10 +1,12 @@
 ---
 title: "MICB425_Project1"
-author: "Team 1: Albert Chang (), Alison Fong (33399149), Karen Lau (16524143), Yaqian Luo (59751503), Jessica Ngo (31837131), Peter (Kiet) Truong (36645133)"
+author: 'Team 1: Albert Chang (), Alison Fong (33399149), Karen Lau (16524143), Yaqian
+  Luo (59751503), Jessica Ngo (31837131), Peter (Kiet) Truong (36645133)'
 date: '2018-03-16'
-output: 
-html_document:
-toc: true
+output:
+  html_document: null
+  '': default
+toc: yes
 ---
 
 #Abstract
@@ -244,6 +246,9 @@ ggplot() +
 Table showing richness of OTUs using Mothur data
 ```{r Question 3a}
 m.norm %>% 
+  subset_taxa(Phylum=="Cyanobacteria")
+
+m.norm %>% 
   subset_taxa(Phylum=="Cyanobacteria") %>%
   estimate_richness(measures = c("Observed"))
 
@@ -251,6 +256,9 @@ m.norm %>%
 
 Table showing richness of ASVs using Qiime2 data
 ```{r Question 3b}
+q.norm %>% 
+  subset_taxa(Phylum=="D_1__Cyanobacteria")
+
 q.norm %>% 
   subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
   estimate_richness(measures = c("Observed"))
