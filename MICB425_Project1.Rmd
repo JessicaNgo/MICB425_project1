@@ -268,6 +268,30 @@ q.norm %>%
 
 ###Mothur data
 ```{r Question 4a, fig.width=10, fig.height=10}
+#filtered table 
+m.Cyano=m.norm %>% subset_taxa(Phylum=="Cyanobacteria") 
+m.filtered=data.frame(m.Cyano@tax_table)
+
+#General linear model for each OTU across depth
+otu_stats = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
+for (otu in row.names(m.filtered)){
+  require(tidyverse)
+  require(knitr)
+    linear_fit = m.norm %>% 
+    psmelt() %>% 
+    filter(OTU==otu) %>% 
+    lm(Abundance ~ Depth_m, .) %>% 
+    summary()
+  otu_data = linear_fit$coefficients["Depth_m",]
+  otu_stats <- rbind(otu_stats, otu_data)
+}
+
+colnames(otu_stats)<- (c("Estimate", "Std. Error","t value","P_value"))
+otu_depth=otu_stats%>%
+  mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
+row.names(otu_depth) <- row.names(m.filtered)
+kable(otu_depth,caption="Correlation data of OTUs within Cyanobacteria phylum across depth")
+
 #Calculating abundances of OTUs across depth
 m.perc %>%
   subset_taxa(Phylum=="Cyanobacteria") %>%
@@ -287,6 +311,26 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=OTU, size=Abundance, color=OTU)) +
   scale_size_continuous(range = c(1,6)) +
   labs(title="Figure 18: Abundance of OTUs within Cyanobacteria across depth")
+
+#General linear model for each OTU across oxygen
+otu_stats_O2 = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
+for (otu in row.names(m.filtered)){
+  require(tidyverse)
+  require(knitr)
+    linear_fit = m.norm %>% 
+    psmelt() %>% 
+    filter(OTU==otu) %>% 
+    lm(Abundance ~ O2_uM, .) %>% 
+    summary()
+  otu_data_O2 = linear_fit$coefficients["O2_uM",]
+  otu_stats_O2 <- rbind(otu_stats_O2, otu_data_O2)
+}
+
+colnames(otu_stats_O2)<- (c("Estimate", "Std. Error","t value","P_value"))
+otu_oxygen=otu_stats_O2%>%
+  mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
+row.names(otu_oxygen) <- row.names(m.filtered)
+kable(otu_oxygen,caption="Correlation data of OTUs within Cyanobacteria phylum across oxygen")
 
 #Calculating abundances of OTUs across oxygen
 m.perc %>%
@@ -312,6 +356,29 @@ ggplot() +
 
 ###Qiime2 data
 ```{r Question 4b, fig.width=10, fig.height=10}
+#filtered table 
+q.Cyano=q.norm %>% subset_taxa(Phylum=="D_1__Cyanobacteria") 
+q.filtered=data.frame(q.Cyano@tax_table)
+
+#General linear model for each ASV across depth
+asv_stats = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
+for (asv in row.names(q.filtered)){
+  require(tidyverse)
+  require(knitr)
+    linear_fit = q.norm %>% 
+    psmelt() %>% 
+    filter(OTU==asv) %>% 
+    lm(Abundance ~ Depth_m, .) %>% 
+    summary()
+  asv_data = linear_fit$coefficients["Depth_m",]
+  asv_stats <- rbind(asv_stats, asv_data)
+}
+
+colnames(asv_stats)<- (c("Estimate", "Std. Error","t value","P_value"))
+asv_depth=asv_stats%>%
+  mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
+row.names(asv_depth) <- row.names(q.filtered)
+kable(asv_depth,caption="Correlation data of ASVs within Cyanobacteria phylum across depth")
 
 #Calculating abundaces of ASVs across depth
 q.perc %>%
@@ -332,6 +399,26 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=OTU, size=Abundance, color=OTU)) +
   scale_size_continuous(range = c(1,6)) +
   labs(title="Figure 22: Abundance of ASVs within Cyanobacteria across depth")
+
+#General linear model for each ASV across oxygen
+asv_stats_O2 = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
+for (asv in row.names(q.filtered)){
+  require(tidyverse)
+  require(knitr)
+    linear_fit = q.norm %>% 
+    psmelt() %>% 
+    filter(OTU==asv) %>% 
+    lm(Abundance ~ O2_uM, .) %>% 
+    summary()
+  asv_data_O2 = linear_fit$coefficients["O2_uM",]
+  asv_stats_O2 <- rbind(asv_stats_O2, asv_data_O2)
+}
+
+colnames(asv_stats_O2)<- (c("Estimate", "Std. Error","t value","P_value"))
+asv_oxygen=asv_stats_O2%>%
+  mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
+row.names(asv_oxygen) <- row.names(q.filtered)
+kable(asv_oxygen,caption="Correlation data of ASVs within Cyanobacteria phylum across oxygen")
 
 #Calculating abundance of ASVs across oxygen
 q.perc %>%
