@@ -443,5 +443,18 @@ ggplot() +
 ```
 
 #Discussion
+```{r}
+# Geochemical parameters across depth
+sam_data=data.frame(m.norm@sam_data)
+sam_data1=sam_data%>%mutate(CH4_uM=CH4_nM/1000)
+nutrient=sam_data1 %>% select(Depth_m,O2_uM,PO4_uM,SiO2_uM,NO3_uM,NH4_uM,NO2_uM,H2S_uM,N2O_nM,CH4_uM,Temperature_C, Fluorescence_mgm_3) %>% gather(nutrient,uM,O2_uM,PO4_uM,SiO2_uM,NO3_uM,NH4_uM,NO2_uM,H2S_uM,N2O_nM,CH4_uM, Temperature_C, Fluorescence_mgm_3)
+library(ggplot2)
+ggplot(nutrient,aes(x=Depth_m,y=uM))+
+  geom_line()+
+  geom_point()+
+  ylab("Concentration or degree or mgm3")+
+  facet_wrap(~nutrient,scales="free_y")+
+  labs(title="Figure 25: Geochemical parameters across depth")
+```
 
 #References
