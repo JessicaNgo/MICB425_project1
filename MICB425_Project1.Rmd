@@ -59,6 +59,9 @@ ggplot() +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
    labs(title="Figure 1: Alpha-diversity across depth using mothur data", y="Shannon's diversity index", x="Depth (m)")
 
+#Mothur data - ANOVA test on Alpha diversity across depth
+summary(aov(Shannon ~ Depth_m, data = m.meta.alpha))
+  
 #Mothur data - Alpha diversity across oxygen
 m.meta.alpha %>%
 ggplot() +
@@ -84,6 +87,9 @@ ggplot() +
    geom_point(aes(x=Depth_m, y=Shannon)) +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
    labs(title="Figure 4: Alpha-diversity across depth using qiime2 data", y="Shannon's diversity index", x="Depth (m)")
+
+#Mothur data - ANOVA test on Alpha diversity across depth
+summary(aov(Shannon ~ Depth_m, data = q.meta.alpha))
 
 #Qiime2 data - Alpha-diversity across oxygen
 q.meta.alpha %>%
@@ -455,6 +461,13 @@ ggplot(nutrient,aes(x=Depth_m,y=uM))+
   ylab("Concentration or degree or mgm3")+
   facet_wrap(~nutrient,scales="free_y")+
   labs(title="Figure 25: Geochemical parameters across depth")
+```
+
+```{r}
+# Linear model of fluorescence across depth
+sam_data%>%
+  lm(Fluorescence_mgm_3~Depth_m,.)%>%
+  summary()
 ```
 
 #References
