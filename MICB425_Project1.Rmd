@@ -109,7 +109,7 @@ ggplot() +
 ###Taxa presence and abundance
 ```{r Question 1b}
 #Mothur data - Domain across samples
-m.perc %>%
+m.perc%>%
 plot_bar(fill="Domain") +
   geom_bar(aes(fill=Domain), stat="identity") +
   labs(title="Figure 7: Domains across samples using mothur data")
