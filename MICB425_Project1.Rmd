@@ -4,9 +4,11 @@ author: 'Team 1: Albert Chang (), Alison Fong (33399149), Karen Lau (16524143), 
   Luo (59751503), Jessica Ngo (31837131), Peter (Kiet) Truong (36645133)'
 date: '2018-03-16'
 output:
-  html_document: null
-  '': default
-toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float:
+      collapsed: no
 ---
 
 #Abstract
