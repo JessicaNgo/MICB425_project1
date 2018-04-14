@@ -4,11 +4,9 @@ author: 'Team 1: Albert Chang (), Alison Fong (33399149), Karen Lau (16524143), 
   Luo (59751503), Jessica Ngo (31837131), Peter (Kiet) Truong (36645133)'
 date: '2018-03-16'
 output:
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_float:
-      collapsed: no
+  html_document: null
+  '': default
+toc: yes
 ---
 
 #Abstract
@@ -25,6 +23,7 @@ library("tidyverse")
 library("phyloseq")
 library("magrittr")
 library("knitr")
+library("cowplot")
 
 load("./mothur_phyloseq.RData")
 load("./qiime2_phyloseq.RData")
@@ -50,36 +49,38 @@ q.perc = transform_sample_counts(q.norm, function(x) 100 * x/sum(x))
 ##How does microbial community structure change with depth and oxygen concentration?
 
 ###Alpha-diversity
-```{r Question 1a_1}
+```{r Question 1a_1, fig.width=14, fig.height=10}
 #Mothur data
 m.alpha = estimate_richness(m.norm, measures = c("Chao1", "Shannon"))
 m.meta.alpha = full_join(rownames_to_column(m.alpha), rownames_to_column(data.frame(m.perc@sam_data)), by = "rowname")
 
 #Mother data - Alpha diversity across depth
-m.meta.alpha %>%
+plot_1=m.meta.alpha %>%
 ggplot() +
    geom_point(aes(x=Depth_m, y=Shannon)) +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
-   labs(caption="Figure 1: Alpha-diversity across depth using mothur data", y="Shannon's diversity index", x="Depth (m)")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+   labs(y="Shannon's diversity index", x="Depth (m)")
 
 #Mothur data - ANOVA test on Alpha diversity across depth
 summary(aov(Shannon ~ Depth_m, data = m.meta.alpha))
   
 #Mothur data - Alpha diversity across oxygen
-m.meta.alpha %>%
+plot_2=m.meta.alpha %>%
 ggplot() +
   geom_point(aes(x=O2_uM, y=Shannon)) +
-  labs(caption="Figure 2: Alpha-diversity across oxygen using mothur data", y="Shannon's diversity index", x="Oxygen (uM)")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(y="Shannon's diversity index", x="Oxygen (uM)")
 
 #Mothur data - Alpha diversity by oxic/anoxic
-m.meta.alpha %>%
+plot_3=m.meta.alpha %>%
   mutate(O2_group = ifelse(O2_uM == 0, "anoxic", "oxic")) %>%
 ggplot() +
   geom_boxplot(aes(x=O2_group, y=Shannon)) +
-  labs(caption="Figure 3: Alpha-diversity by oxic/anoxic using mothur data", y="Shannon's diversity index", x="Oxygen")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(y="Shannon's diversity index", x="Oxygen")
+
+plot_grid(plot_1, plot_2, plot_3, labels=c("A", "B","c"))+
+   labs(caption="Figure 1. Alpha-diversity across depth or oxygen using mothur data. A) Alpha-diversity across depth using mothur data.
+        B) Alpha-diversity across oxygen using mothur data. C) Alpha-diversity by oxic/anoxic using mothur data")+
+  theme(plot.caption = element_text(size=rel(1.2)))
 
 # Average and standard deviation of mothur by oxic/anoxic
 m.oxygen=m.meta.alpha %>%
@@ -101,40 +102,41 @@ ave.m.anoxic
 st.m.anoxic
 ave.m.oxic
 st.m.oxic
+```
 
+``` {r Question 1a_2, fig.width=14, fig.height=10}
 #Qiime2 data
 q.alpha = estimate_richness(q.norm, measures = c("Chao1", "Shannon"))
 q.meta.alpha = full_join(rownames_to_column(q.alpha), rownames_to_column(data.frame(q.perc@sam_data)), by = "rowname")
 
 #Qiime 2 data - Alpha diversity across depth
-q.meta.alpha %>%
+plot_4=q.meta.alpha %>%
  
 ggplot() +
    geom_point(aes(x=Depth_m, y=Shannon)) +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
-   labs(caption="Figure 4: Alpha-diversity across depth using qiime2 data", y="Shannon's diversity index", x="Depth (m)")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-
-#Mothur data - ANOVA test on Alpha diversity across depth
+   labs(y="Shannon's diversity index", x="Depth (m)")
+ 
+#Qiime2 data - ANOVA test on Alpha diversity across depth
 summary(aov(Shannon ~ Depth_m, data = q.meta.alpha))
 
 #Qiime2 data - Alpha-diversity across oxygen
-q.meta.alpha %>%
+plot_5=q.meta.alpha %>%
 ggplot() +
   geom_point(aes(x=O2_uM, y=Shannon)) +
-  labs(caption="Figure 5: Alpha-diversity across oxygen using qiime2 data",  y="Shannon's diversity index", x="Oxygen (uM)") +
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-  
-```
-
-```{r Question 1a_6}
+  labs(y="Shannon's diversity index", x="Oxygen (uM)") 
+ 
 #Qiime2 data - Alpha-diversity by oxic/anoxic
-q.meta.alpha %>%
+plot_6=q.meta.alpha %>%
   mutate(O2_group = ifelse(O2_uM == 0, "anoxic", "oxic")) %>%
 ggplot() +
   geom_boxplot(aes(x=O2_group, y=Shannon)) +
-  labs(caption="Figure 6: Alpha-diversity by oxic/anoxic using qiime2 data", y="Shannon's diversity index", x="Oxygen")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(y="Shannon's diversity index", x="Oxygen")
+  
+plot_grid(plot_4, plot_5, plot_6, labels=c("A", "B","c"))+
+   labs(caption="Figure 2. Alpha-diversity across depth or oxygen using QIIME2 data. A) Alpha-diversity across depth using QIIME2 data. 
+        B) Alpha-diversity across oxygen using QIIME2 data. C) Alpha-diversity by oxic/anoxic using QIIME2 data")+
+  theme(plot.caption = element_text(size=rel(1.2)))
 
 # Average and standard deviation of quiime2 by oxic/anoxic
 q.oxygen=q.meta.alpha %>%
@@ -160,66 +162,31 @@ sd.q.oxic
 ```
 
 ###Taxa presence and abundance
-```{r Question 1b_1, fig.width=12, fig.height=7}
-#Mothur data - Phyla across samples
-m.perc %>%
-plot_bar(fill="Phylum") +
-  geom_bar(aes(fill=Phylum), stat="identity") +
-  labs(caption="Figure 7: Phyla across samples using mothur data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-
+```{r Question 1b_1, fig.width=19, fig.height=15}
 #Mothur data - Phyla across samples
 m.perc %>%
 plot_bar() +
   geom_bar(aes(fill=Phylum), stat="identity") +
   facet_wrap(~Phylum, scales="free_y")+
-  labs(caption="Figure 8: Phyla across samples using mothur data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-
-#Mothur data - Phylum boxplots
-m.perc %>%
-  tax_glom(taxrank = 'Phylum') %>%
-  psmelt() %>%
-ggplot() +
-  geom_boxplot(aes(x=Phylum, y=Abundance)) +
-  coord_flip() +
-  labs(caption="Figure 9: Phylum boxplots using mothur data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-
-#Qiime2 data - Phyla across samples
-q.perc %>%
-plot_bar(fill="Phylum") +
-  geom_bar(aes(fill=Phylum), stat="identity") +
-  labs(caption="Figure 10: Phyla across samples using qiime2 data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
+  theme(legend.position="none")+
+  labs(caption="Figure 3. Taxa within phylum level across samples using mothur data")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(1.7)))
 ```
 
-```{r Question 1b_2, fig.width=13, fig.height=7}
+```{r Question 1b_2, fig.width=18, fig.height=13}
 #Qiime2 data - Phyla across samples
 q.perc %>%
 plot_bar() +
   geom_bar(aes(fill=Phylum), stat="identity") +
   facet_wrap(~Phylum, scales="free_y")+
-  labs(caption="Figure 11: Phyla across samples using qiime2 data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-```
-
-```{r Question 1b_3, fig.width=12, fig.height=7}
-#Qiime2 - Phylum boxplots
-q.perc %>%
-  tax_glom(taxrank = 'Phylum') %>%
-  psmelt() %>%
-ggplot() +
-  geom_boxplot(aes(x=Phylum, y=Abundance)) +
-  coord_flip() +
-  labs(caption="Figure 12: Phylum boxplots using qiime2 data")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-
+  theme(legend.position="none")+
+  labs(caption="Figure 4. Taxa within phylum level across samples using qiime2 data")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(1.7)))
 ```
 
 ##Does your taxon of interest significantly differ in abundance with depth and/or oxygen concentration?  
 ###Mothur data
-```{r Question 2a}
+```{r Question 2a, fig.width=8, fig.height=4}
 #Calculating significance with linear model for depth
 m.norm %>% 
   subset_taxa(Phylum=="Cyanobacteria") %>% 
@@ -230,7 +197,7 @@ m.norm %>%
   summary()
 
 #Plot to go along with linear model above
-m.perc %>% 
+plot_7=m.perc %>% 
   subset_taxa(Phylum=="Cyanobacteria") %>% 
   psmelt() %>% 
   group_by(Sample) %>% 
@@ -238,9 +205,7 @@ m.perc %>%
   
   ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance_sum)) +
-  geom_smooth(method='lm', aes(x=as.numeric(Depth_m), y=Abundance_sum)) +
-  labs(caption="Figure 13: Abundance of Cyanobacteria across depth using Mothur OTUs")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  geom_smooth(method='lm', aes(x=as.numeric(Depth_m), y=Abundance_sum)) 
 
 #Calculating significance with linear model for oxygen
 m.norm %>% 
@@ -252,7 +217,7 @@ m.norm %>%
   summary()
 
 #Plot to go along with linear model above
-m.perc %>% 
+plot_8=m.perc %>% 
   subset_taxa(Phylum=="Cyanobacteria") %>% 
   psmelt() %>% 
   group_by(Sample) %>% 
@@ -260,14 +225,16 @@ m.perc %>%
   
   ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance_sum)) +
-  geom_smooth(method='lm', aes(x=as.numeric(O2_uM), y=Abundance_sum)) +
-  labs(caption="Figure 14: Abundance of Cyanobacteria across oxygen concentrations using Mothur OTUs")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  geom_smooth(method='lm', aes(x=as.numeric(O2_uM), y=Abundance_sum)) 
 
+plot_grid(plot_7, plot_8, labels=c("A", "B"))+
+  labs(caption="Figure 5. Abundance of Cyanobacteria across depth/oxygen concentrations using mothur OTUs. 
+       A) Abundance of Cyanobacteria across depth. B) Abundance of Cyanobacteria across oxygen concentrations.")+
+  theme(plot.caption = element_text(hjust=0.5,size=rel(0.8)))
 ```
 
 ###Qiime2 data
-```{r Question 2b}
+```{r Question 2b, fig.width=8, fig.height=4}
 
 #Calculating significance with linear model for depth
 q.norm %>%
@@ -279,7 +246,7 @@ q.norm %>%
   summary()
 
 #Plot to go along with linear model above
-q.perc %>%
+plot_9=q.perc %>%
   subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
   psmelt() %>%
   group_by(Sample) %>%
@@ -287,9 +254,7 @@ q.perc %>%
  
 ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance_sum)) +
-  geom_smooth(method='lm', aes(x=as.numeric(Depth_m), y=Abundance_sum)) +
-  labs(caption="Figure 15: Abundance of Cyanobacteria across depth using Qiime ASVs")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  geom_smooth(method='lm', aes(x=as.numeric(Depth_m), y=Abundance_sum)) 
 
 #Calculating significance with linear model for oxygen
 q.norm %>%
@@ -300,7 +265,7 @@ q.norm %>%
   summary()
 
 #Plot to go along with linear model above
-q.perc %>%
+plot_10=q.perc %>%
   subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
   psmelt() %>%
   group_by(Sample) %>%
@@ -308,10 +273,12 @@ q.perc %>%
  
 ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance_sum)) +
-  geom_smooth(method='lm', aes(x=as.numeric(O2_uM), y=Abundance_sum)) +
-  labs(caption="Figure 16: Abundance of Cyanobacteria across Oxygen using Qiime ASVs")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  geom_smooth(method='lm', aes(x=as.numeric(O2_uM), y=Abundance_sum)) 
 
+plot_grid(plot_9, plot_10, labels=c("A", "B"))+
+  labs(caption="Figure 6. Abundance of Cyanobacteria across depth/oxygen concentrations using QIIME2 ASVs. 
+       A) Abundance of Cyanobacteria across depth. B) Abundance of Cyanobacteria across oxygen concentrations.")+
+  theme(plot.caption = element_text(hjust=0.5,size=rel(0.8)))
 ```
 
 ##Within your taxon, what is the richness (number of OTUs/ASVs)?
@@ -334,14 +301,14 @@ Depth=sam_data%>%select("Depth_m")
 
 otu_asv=cbind(Depth, mothur_otu, qiime_asv)
 colnames(otu_asv)=c("Depth_m","OTU","ASV")
-kable(otu_asv, caption="Table 1. OTUs/ASVs across depth")
+kable(otu_asv, caption="Table 1. OTUs/ASVs across depth",align = "c")%>%
 
 ```
 
 ##Do the abundances of OTUs/ASVs within your taxon of interest change significantly with depth and/or oxygen concentration?
 
 ###Mothur data
-```{r Question 4a, fig.width=10, fig.height=10}
+```{r Question 4a,fig.width=10,fig.height=7}
 #filtered table 
 m.Cyano=m.norm %>% subset_taxa(Phylum=="Cyanobacteria") 
 m.filtered=data.frame(m.Cyano@tax_table)
@@ -364,7 +331,8 @@ colnames(otu_stats)<- (c("Estimate", "Std. Error","t value","P_value"))
 otu_depth=otu_stats%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(otu_depth) <- row.names(m.filtered)
-kable(otu_depth,caption="Table 2. Correlation data of OTUs within Cyanobacteria phylum across depth")
+otu_depth_filter=otu_depth[which(otu_depth[,"Adjusted_P"]<=0.05),]
+kable(otu_depth_filter,caption="Table 2. Correlation data of Cyanobacteria OTUs with significant differences across depth",align = "c")
 
 #Calculating abundances of OTUs across depth
 m.perc %>%
@@ -375,18 +343,8 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance)) +
   geom_smooth(method='lm', aes(x=Depth_m, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 17: Abundance of OTUs within Phylum Cyanobacteria across depth")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-
-m.perc %>%
-  subset_taxa(Phylum=="Cyanobacteria") %>%
-  psmelt() %>%
- 
-ggplot() +
-  geom_point(aes(x=Depth_m, y=OTU, size=Abundance, color=OTU)) +
-  scale_size_continuous(range = c(1,6)) +
-  labs(caption="Figure 18: Abundance of OTUs within Cyanobacteria across depth")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(caption="Figure 7. Abundance of OTUs within Phylum Cyanobacteria across depth")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(0.9)))
 
 #General linear model for each OTU across oxygen
 otu_stats_O2 = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
@@ -406,7 +364,8 @@ colnames(otu_stats_O2)<- (c("Estimate", "Std. Error","t value","P_value"))
 otu_oxygen=otu_stats_O2%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(otu_oxygen) <- row.names(m.filtered)
-kable(otu_oxygen,caption="Table 3. Correlation data of OTUs within Cyanobacteria phylum across oxygen")
+otu_oxygen_filter=otu_oxygen[which(otu_oxygen[,"Adjusted_P"]<=0.05),]
+kable(otu_oxygen_filter,caption="Table 3. Correlation data of Cyanobacteria OTUs with significant differences across oxygen", align = "c")
 
 #Calculating abundances of OTUs across oxygen
 m.perc %>%
@@ -417,23 +376,13 @@ ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance)) +
   geom_smooth(method='lm', aes(x=O2_uM, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 19: Abundance of OTUs within Cyanobacteria across oxygen")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-
-m.perc %>%
-  subset_taxa(Phylum=="Cyanobacteria") %>%
-  psmelt() %>%
- 
-ggplot() +
-  geom_point(aes(x=O2_uM, y=OTU, size=Abundance, color=OTU)) +
-  scale_size_continuous(range = c(1,6)) +
-  labs(caption="Figure 20: Abundance of OTUs within Cyanobacteria across oxygen")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(caption="Figure 8. Abundance of OTUs within Cyanobacteria across oxygen")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(0.9)))
 
 ```
 
 ###Qiime2 data
-```{r Question 4b_1, fig.width=10, fig.height=10}
+```{r Question 4b_1}
 #filtered table 
 q.Cyano=q.norm %>% subset_taxa(Phylum=="D_1__Cyanobacteria") 
 q.filtered=data.frame(q.Cyano@tax_table)
@@ -456,10 +405,11 @@ colnames(asv_stats)<- (c("Estimate", "Std. Error","t value","P_value"))
 asv_depth=asv_stats%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(asv_depth) <- row.names(q.filtered)
-kable(asv_depth,caption="Table 4. Correlation data of ASVs within Cyanobacteria phylum across depth")
+asv_depth_filter=asv_depth[which(asv_depth[,"Adjusted_P"]<=0.05),]
+kable(asv_depth_filter,caption="Correlation data of Cyanobacteria ASVs with significant differences across depth",align = "c")
 ```
 
-```{r Question 4b_2, fig.width=13, fig.height=8}
+```{r Question 4b_2, fig.width=15, fig.height=10}
 #Calculating abundaces of ASVs across depth
 q.perc %>%
   subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
@@ -469,21 +419,11 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance)) +
   geom_smooth(method='lm', aes(x=Depth_m, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 21: Abundance of ASVs within cyanobacteria across depth")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
+  labs(caption="Figure 9. Abundance of ASVs within cyanobacteria across depth")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(1.3)))
 ```
 
-```{r Question 4b_3, fig.width=10, fig.height=10}
-q.perc %>%
-  subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
-  psmelt() %>%
- 
-ggplot() +
-  geom_point(aes(x=Depth_m, y=OTU, size=Abundance, color=OTU)) +
-  scale_size_continuous(range = c(1,6)) +
-  labs(caption="Figure 22: Abundance of ASVs within Cyanobacteria across depth")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-
+```{r Question 4b_3}
 #General linear model for each ASV across oxygen
 asv_stats_O2 = data.frame("Estimate" = numeric(0), "Std. Error"= numeric(0),"t value"= numeric(0),"P_value"= numeric(0))
 for (asv in row.names(q.filtered)){
@@ -502,7 +442,8 @@ colnames(asv_stats_O2)<- (c("Estimate", "Std. Error","t value","P_value"))
 asv_oxygen=asv_stats_O2%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(asv_oxygen) <- row.names(q.filtered)
-kable(asv_oxygen,caption="Table 5. Correlation data of ASVs within Cyanobacteria phylum across oxygen")
+asv_oxygen_filter=asv_oxygen[which(asv_oxygen[,"Adjusted_P"]<=0.05),]
+kable(asv_oxygen_filter,caption="Table 4. Correlation data of Cyanobacteria ASVs with significant differences across oxygen", align = "c")
 ```
 
 ```{r Question 4b_4, fig.width=13, fig.height=8}
@@ -515,25 +456,12 @@ ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance)) +
   geom_smooth(method='lm', aes(x=O2_uM, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 23: Abundance of ASVs within Cyanobacteria across oxygen")+
-  theme(plot.caption = element_text(hjust=0.7, size=rel(1.6)))
-```
-
-```{r Question 4b_5, fig.width=10, fig.height=10}
-q.perc %>%
-  subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
-  psmelt() %>%
- 
-ggplot() +
-  geom_point(aes(x=O2_uM, y=OTU, size=Abundance, color=OTU)) +
-  scale_size_continuous(range = c(0,5)) +
-  labs(caption="Figure 24: Abundance of ASVs within Cyanobacteria across oxygen")+
+  labs(caption="Figure 10. Abundance of ASVs within Cyanobacteria across oxygen")+
   theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
-
 ```
 
 #Discussion
-```{r}
+```{r, fig.width=10, fig.height=7}
 # Geochemical parameters across depth
 sam_data=data.frame(m.norm@sam_data)
 sam_data1=sam_data%>%mutate(CH4_uM=CH4_nM/1000)
@@ -544,8 +472,8 @@ ggplot(nutrient,aes(x=Depth_m,y=uM))+
   geom_point()+
   ylab("Concentration or degree or mgm3")+
   facet_wrap(~nutrient,scales="free_y")+
-  labs(caption="Figure 25: Geochemical parameters across depth")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(caption="Figure 11. Geochemical parameters across depth")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(0.8)))
 ```
 
 ```{r}
