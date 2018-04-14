@@ -2,10 +2,10 @@
 title: "MICB425_Project1"
 author: 'Team 1: Albert Chang (), Alison Fong (33399149), Karen Lau (16524143), Yaqian
   Luo (59751503), Jessica Ngo (31837131), Peter (Kiet) Truong (36645133)'
-date: '2018-03-16'
+date: "version `r format(Sys.time(), '%B %d, %Y')`"
 output:
-  html_document: null
-toc: yes
+  html_document: 
+  toc: yes
 ---
 
 
@@ -32,23 +32,12 @@ Samples were PCR amplified using the 515F and 808R primers, then sequenced accor
 #####Data Processing
 Sequences were processed using either mothur or QIIME2 as follows:  
 
-*mothur Pipeline*: mothur was used to clean-up the data. In brief, paired end reads were combined into contigs using their overlapping regions. Low quality sequences, useless sequence data, chimeric sequences and singletons were removed. OTUs were then determined at 97% similarity. OTUs were classified using the SILVA databases, and the taxonomies for each OTU were condensed. The OTU table, taxonomy data and sample metadata were subsequently cleaned up and combined into a phyloseq object.  
+*Mothur Pipeline*: mothur was used to clean-up the data. In brief, paired end reads were combined into contigs using their overlapping regions. Low quality sequences, useless sequence data, chimeric sequences and singletons were removed. OTUs were then determined at 97% similarity. OTUs were classified using the SILVA databases, and the taxonomies for each OTU were condensed. The OTU table, taxonomy data and sample metadata were subsequently cleaned up and combined into a phyloseq object.  
 
 *QIIME2 Pipeline*: Demultiplexed sequences were imported into QIIME as manifest reads. QIIME was used to clean up the data along with ASV determination in one step. Sequence quality was visually evaluated, and sequence quality trimming was conducted. All other trimming/filtering parameters were left as default. ASV determination was completed using the Dada2 protocol. ASV classification was completed using the Silva version 119 database at 99% similarity. The ASV table, taxonomy data and sample metadata were subsequently cleaned up and combined into a phyloseq object.  
 
 #####Data Analysis   
-The aforementioned phyloseq objects were imported into R version 3.4.3 (Windows) or 1.1.383 (Mac). The tidyverse, phyloseq, magrittr and knitr packages were loaded and used to complete the data analysis. Data was piped into linear models and ANOVA tests to determine statistical significance at the 95% confidence level.  
-
-####Results  
-
-1. How does microbial community structure change with depth and oxygen concentration?  
-
-**Alpha-diversity comparison:**   
-*Mothur*  
-As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220µM. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
-
-*QIIME2*  
-The trends of Shannon's diversity index across depth and oxygen based on QIIME2 data are similar to those of mothur data. However, QIIME2 pipeline produces higher Shannon's diversity index than mothur does. Shannon's diversity index increases from 2.9-5.2 at oxygen concentrations of 0-40$\mu$M and decreases from 5.2-5.1 at oxygen concentrations of 40-200m. Figure 2 shows that Shannon's diversity index is higher in oxic conditions (4.80 ± 0.43) than anoxic conditions (3.15 ± 0.18).  
+The aforementioned phyloseq objects were imported into R version 3.4.3 (Windows) or 1.1.383 (Mac). The tidyverse, phyloseq, magrittr, knitr and cowplot packages were loaded and used to complete the data analysis. Data was piped into linear models and ANOVA tests to determine statistical significance at the 95% confidence level.  
 
 ######Environment setup and Data Cleaning
 ```{r, echo=FALSE, "loading packages and data"}
@@ -78,6 +67,19 @@ q.norm = rarefy_even_depth(qiime2, sample.size=100000)
 q.perc = transform_sample_counts(q.norm, function(x) 100 * x/sum(x))
 
 ```
+
+####Results  
+
+1. How does microbial community structure change with depth and oxygen concentration?  
+
+**Alpha-diversity comparison:**   
+*Mothur*  
+As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220µM. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
+
+*QIIME2*  
+The trends of Shannon's diversity index across depth and oxygen based on QIIME2 data are similar to those of mothur data. However, QIIME2 pipeline produces higher Shannon's diversity index than mothur does. Shannon's diversity index increases from 2.9-5.2 at oxygen concentrations of 0-40$\mu$M and decreases from 5.2-5.1 at oxygen concentrations of 40-200m. Figure 2 shows that Shannon's diversity index is higher in oxic conditions (4.80 ± 0.43) than anoxic conditions (3.15 ± 0.18).  
+
+######Alpha-diversity of mothur data
 ```{r, echo=FALSE, "Question 1a_1", fig.width=14, fig.height=10}
 #Mothur data
 m.alpha = estimate_richness(m.norm, measures = c("Chao1", "Shannon"))
@@ -90,9 +92,6 @@ ggplot() +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
    labs(y="Shannon's diversity index", x="Depth (m)")
 
-#Mothur data - ANOVA test on Alpha diversity across depth
-summary(aov(Shannon ~ Depth_m, data = m.meta.alpha))
-  
 #Mothur data - Alpha diversity across oxygen
 plot_2=m.meta.alpha %>%
 ggplot() +
@@ -127,12 +126,17 @@ m.oxic=m.oxygen%>%
 ave.m.oxic=mean(m.oxic$Shannon)
 st.m.oxic=sd(m.oxic$Shannon)
 
-ave.m.anoxic
-st.m.anoxic
-ave.m.oxic
-st.m.oxic
+m.avg_std = data.frame(
+  Statistic=c("Average","Standard deviation"),
+  Oxic=c(ave.m.oxic, st.m.oxic),
+  Anoxic=c(ave.m.anoxic, st.m.anoxic)
+)
+
+kable(m.avg_std,captio="Table 1. Average and standard deviation of alpha-diversity by oxic/anoxic with mothur data", align = "c")
+
 ```
 
+######Alpha-diversity of QIIME2 data
 ``` {r, echo=FALSE, "Question 1a_2", fig.width=14, fig.height=10}
 #Qiime2 data
 q.alpha = estimate_richness(q.norm, measures = c("Chao1", "Shannon"))
@@ -146,9 +150,6 @@ ggplot() +
    geom_smooth(method='auto', aes(x=as.numeric(Depth_m), y=Shannon)) +
    labs(y="Shannon's diversity index", x="Depth (m)")
  
-#Qiime2 data - ANOVA test on Alpha diversity across depth
-summary(aov(Shannon ~ Depth_m, data = q.meta.alpha))
-
 #Qiime2 data - Alpha-diversity across oxygen
 plot_5=q.meta.alpha %>%
 ggplot() +
@@ -183,10 +184,13 @@ q.oxic=q.oxygen%>%
 ave.q.oxic=mean(q.oxic$Shannon)
 sd.q.oxic=sd(q.oxic$Shannon)
 
-ave.q.anoxic
-sd.q.anoxic
-ave.q.oxic
-sd.q.oxic
+q.avg_std = data.frame(
+  Statistic=c("Average","Standard deviation"),
+  Oxic=c(ave.q.oxic, sd.q.oxic),
+  Anoxic=c(ave.q.anoxic, sd.q.anoxic)
+)
+
+kable(q.avg_std,captio="Table 2. Average and standard deviation of alpha-diversity by oxic/anoxic with QIIME2 data", align = "c")
 
 ```
 
@@ -222,13 +226,13 @@ plot_bar() +
 
 2. Does your taxon of interest significantly differ in abundance with depth and/or oxygen concentration?  
 
-*Mothur data*  
+*Mothur*  
 The difference in cyanobacteria abundance within depth or oxygen was estimated by the linear model using mothur processed data. The statistical results show that abundance of cyanobacteria is significantly different with depth (p = 0.01263) and oxygen (p = 0.00012). However linear models in Figure 5 indicate completely distinct trends of cyanobacteria abundance across depth and oxygen, where there is a decrease in abundance as depth increases and an increase in abundance as oxygen concentrations increases respectively.  
 
-*QIIME2 data*  
+*QIIME2*  
 For data processed by QIIME2 pipeline, ANOVA tests indicate cyanobacteria abundance in the seven samples has significantly difference across depth (p = 0.014) and oxygen (p = 0.013).The linear models in Figure 6 reveal that cyanobacteria abundance decreases at deeper water or in the environment with insufficient oxygen.  
 
-```{r, echo=FALSE, "Question 2a", fig.width=8, fig.height=4}
+```{r, echo=FALSE, "Question 2a", fig.width=10, fig.height=4}
 #Calculating significance with linear model for depth
 m.norm %>% 
   subset_taxa(Phylum=="Cyanobacteria") %>% 
@@ -276,7 +280,7 @@ plot_grid(plot_7, plot_8, labels=c("A", "B"))+
 ```
 
 
-```{r, echo=FALSE, "Question 2b", fig.width=8, fig.height=4}
+```{r, echo=FALSE, "Question 2b", fig.width=10, fig.height=4}
 
 #Calculating significance with linear model for depth
 q.norm %>%
@@ -325,15 +329,14 @@ plot_grid(plot_9, plot_10, labels=c("A", "B"))+
 
 3. Within your taxon, what is the richness (number of OTUs/ASVs)?  
 
-*Mothur data*  
-Across all samples, there are 15 OTUs within cyanobacteria phylum. Table 1 presents the numbers of OTUs within cyanobacteria phylum for each sample. Most of samples contain  3-5 OTUs within cyanobacteria, except Saanich_120 and Saanich_200 which only have 1 and 0 cyanobacteria OTUs respectively.  
+*Mothur*  
+Across all samples, there are 15 OTUs within cyanobacteria phylum. Table 3 presents the numbers of OTUs within cyanobacteria phylum for each sample. Most of samples contain  3-5 OTUs within cyanobacteria, except Saanich_120 and Saanich_200 which only have 1 and 0 cyanobacteria OTUs respectively.  
 
-*QIIME2 data*  
+*QIIME2*  
 There are 51 ASVs within cyanobacteria phylum across all samples. The number of ASVs within cyanobacteria phylum for each sample is shown in Table 2. Saanich_010, Saanich 120, and Saanich_135  have relatively high ASV number equal to or over 15. However, it is important to note that there are no singletons within the ASV dataset, and the function used to estimate richness, "estimate_richness" from the phyloseq library is highly dependent on the number of singletons, and warns of unreliable or wrong results in the absence of singletons in the data.  
 
 
-
-######Table showing richness of OTUs using Mothur data and ASVs using Qiime2 data  
+######Table showing richness of OTUs using mothur data and ASVs using QIIME2 data  
 ```{r, echo=FALSE, "Question 3a"}
 m.norm %>% 
   subset_taxa(Phylum=="Cyanobacteria")
@@ -351,7 +354,7 @@ Depth=sam_data%>%select("Depth_m")
 
 otu_asv=cbind(Depth, mothur_otu, qiime_asv)
 colnames(otu_asv)=c("Depth_m","OTU","ASV")
-kable(otu_asv, caption="Table 1. OTUs/ASVs across depth",align = "c")
+kable(otu_asv, caption="Table 3. OTUs/ASVs across depth",align = "c")
 
 ```
 
@@ -359,7 +362,7 @@ kable(otu_asv, caption="Table 1. OTUs/ASVs across depth",align = "c")
 
 Using the linear model for statistical interpretation, after correcting the p-value for multiple comparisons, the abundance of  OTUs 0189, 0658, 1104, 3852, and 4312 from the mothur pipeline within the cyanobacteria phylum changed significantly with both depth and oxygen. Interestingly, the abundance of ASVs in the QIIME2 pipeline did not have any significant changes across the depth profiles after correcting for the p-value. However, there were 17 ASVs that had a significant abundance change with respect to oxygen concentrations.  
 
-#####Mothur
+######Mothur
 ```{r, echo=FALSE, "Question 4a",fig.width=10,fig.height=7}
 #filtered table 
 m.Cyano=m.norm %>% subset_taxa(Phylum=="Cyanobacteria") 
@@ -384,7 +387,7 @@ otu_depth=otu_stats%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(otu_depth) <- row.names(m.filtered)
 otu_depth_filter=otu_depth[which(otu_depth[,"Adjusted_P"]<=0.05),]
-kable(otu_depth_filter,caption="Table 2. Correlation data of Cyanobacteria OTUs with significant differences across depth",align = "c")
+kable(otu_depth_filter,caption="Table 4. Correlation data of Cyanobacteria OTUs with significant differences across depth using mothur data",align = "c")
 
 #Calculating abundances of OTUs across depth
 m.perc %>%
@@ -395,7 +398,7 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance)) +
   geom_smooth(method='lm', aes(x=Depth_m, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 7. Abundance of OTUs within Phylum Cyanobacteria across depth")+
+  labs(caption="Figure 7. Abundance of OTUs within Phylum Cyanobacteria across depth using mothur data")+
   theme(plot.caption = element_text(hjust=0.5, size=rel(0.9)))
 
 #General linear model for each OTU across oxygen
@@ -417,7 +420,7 @@ otu_oxygen=otu_stats_O2%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(otu_oxygen) <- row.names(m.filtered)
 otu_oxygen_filter=otu_oxygen[which(otu_oxygen[,"Adjusted_P"]<=0.05),]
-kable(otu_oxygen_filter,caption="Table 3. Correlation data of Cyanobacteria OTUs with significant differences across oxygen", align = "c")
+kable(otu_oxygen_filter,caption="Table 5. Correlation data of Cyanobacteria OTUs with significant differences across oxygen using mothur data", align = "c")
 
 #Calculating abundances of OTUs across oxygen
 m.perc %>%
@@ -428,12 +431,12 @@ ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance)) +
   geom_smooth(method='lm', aes(x=O2_uM, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 8. Abundance of OTUs within Cyanobacteria across oxygen")+
+  labs(caption="Figure 8. Abundance of OTUs within Cyanobacteria across oxygen using mothur data")+
   theme(plot.caption = element_text(hjust=0.5, size=rel(0.9)))
 
 ```
 
-######Qiime2
+######QIIME2
 ```{r, echo=FALSE, "Question 4b_1"}
 #filtered table 
 q.Cyano=q.norm %>% subset_taxa(Phylum=="D_1__Cyanobacteria") 
@@ -457,8 +460,14 @@ colnames(asv_stats)<- (c("Estimate", "Std. Error","t value","P_value"))
 asv_depth=asv_stats%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(asv_depth) <- row.names(q.filtered)
+
 asv_depth_filter=asv_depth[which(asv_depth[,"Adjusted_P"]<=0.05),]
-kable(asv_depth_filter,caption="Correlation data of Cyanobacteria ASVs with significant differences across depth",align = "c")
+z=nrow(asv_depth_filter)
+
+if (z!=0) {
+  kable(asv_depth_filter,caption="Correlation data of Cyanobacteria ASVs with significant differences across depth using QIIME2 data",align = "c")
+}else{
+    print("None of ASV has significantly different abundance acrossing depth with QIIME2 data")}
 ```
 
 ```{r, echo=FALSE, "Question 4b_2", fig.width=15, fig.height=10}
@@ -471,7 +480,7 @@ ggplot() +
   geom_point(aes(x=Depth_m, y=Abundance)) +
   geom_smooth(method='lm', aes(x=Depth_m, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 9. Abundance of ASVs within cyanobacteria across depth")+
+  labs(caption="Figure 9. Abundance of ASVs within cyanobacteria across depth using QIIME2 data")+
   theme(plot.caption = element_text(hjust=0.5, size=rel(1.3)))
 ```
 
@@ -495,10 +504,10 @@ asv_oxygen=asv_stats_O2%>%
   mutate(Adjusted_P=p.adjust(P_value, method="fdr"))
 row.names(asv_oxygen) <- row.names(q.filtered)
 asv_oxygen_filter=asv_oxygen[which(asv_oxygen[,"Adjusted_P"]<=0.05),]
-kable(asv_oxygen_filter,caption="Table 4. Correlation data of Cyanobacteria ASVs with significant differences across oxygen", align = "c")
+kable(asv_oxygen_filter,caption="Table 6. Correlation data of Cyanobacteria ASVs with significant differences across oxygen using QIIME2 data", align = "c")
 ```
 
-```{r, echo=FALSE, "Question 4b_4", fig.width=13, fig.height=8}
+```{r, echo=FALSE, "Question 4b_4", fig.width=16, fig.height=10}
 #Calculating abundance of ASVs across oxygen
 q.perc %>%
   subset_taxa(Phylum=="D_1__Cyanobacteria") %>%
@@ -508,16 +517,28 @@ ggplot() +
   geom_point(aes(x=O2_uM, y=Abundance)) +
   geom_smooth(method='lm', aes(x=O2_uM, y=Abundance)) +
   facet_wrap(~OTU, scales="free_y") +
-  labs(caption="Figure 10. Abundance of ASVs within Cyanobacteria across oxygen")+
-  theme(plot.caption = element_text(hjust=0.5, size=rel(1.2)))
+  labs(caption="Figure 10. Abundance of ASVs within Cyanobacteria across oxygen using QIIME2 data")+
+  theme(plot.caption = element_text(hjust=0.5, size=rel(1.3)))
 ```
 
 5. Are the answers to the above the same using mothur and QIIME2 processed data?  
-In terms of differences between the two pipelines, the overall trend between both datasets were similar, however the statistical interpretations of the datasets varied. For starters, the Shannon diversity for the whole microbial community processed with Mothur was generally smaller than that estimated by QIIME 2 processed data. Additionally, ANOVA tests indicated that the Shannon diversity had no significant change across depth from the mothur pipeline (p = 0.054).  In contrast, there was statistical significance with the Shannon diversity across depth from the QIIME2 dataset (p = 0.022). Within the Cyanobacterial taxon, there were 51 ASVs calculated from the QIIME2 pipeline compared to 15 OTUs from the Mothur pipeline. Interestingly, while there is a difference in the richness between both datasets, 5 of the OTUs had a significantly different abundance with respect to depth and oxygen profiles, while none of the ASVs had a significant change in abundance across depth and 17 ASVs which had a significant difference in abundance across oxygen concentrations. Despite all these variations, the Cyanobacterial taxon itself had a significant difference in abundance with respect to depth and oxygen profiles along the water column across both pipelines.  
+
+In terms of differences between the two pipelines, the overall trend between both datasets were similar, however the statistical interpretations of the datasets varied. For starters, the Shannon diversity for the whole microbial community processed with mothur was generally smaller than that estimated by QIIME 2 processed data. Additionally, ANOVA tests indicated that the Shannon diversity had no significant change across depth from the mothur pipeline (p = 0.054). In contrast, there was statistical significance with the Shannon diversity across depth from the QIIME2 dataset (p = 0.022). Within the Cyanobacterial taxon, there were 51 ASVs calculated from the QIIME2 pipeline compared to 15 OTUs from the Mothur pipeline. Interestingly, while there is a difference in the richness between both datasets, 5 of the OTUs had a significantly different abundance with respect to depth and oxygen profiles, while none of the ASVs had a significant change in abundance across depth and 17 ASVs which had a significant difference in abundance across oxygen concentrations. Despite all these variations, the Cyanobacterial taxon itself had a significant difference in abundance with respect to depth and oxygen profiles along the water column across both pipelines.
+
+###### ANOVA on alpha-diversity of mothur data across depth 
+```{r,echo=FALSE}
+#Mothur data - ANOVA test on Alpha diversity across depth
+summary(aov(Shannon ~ Depth_m, data = m.meta.alpha))
+```
+###### ANOVA on alpha-diversity of QIIME2 data across depth
+```{r, echo=FALSE}
+#Qiime2 data - ANOVA test on Alpha diversity across depth
+summary(aov(Shannon ~ Depth_m, data = q.meta.alpha))
+```
 
 ####Discussion
 
-The significant differences for Cyanobacteria abundance across depth and oxygen may be caused by photosynthesis and water temperature. Bacteria of the phylum Cyanobacteria obtain their energy through photosynthesis. These phototrophs are characterized by phycocyanin, a bluish pigment, which functions as an auxiliary light-harvesting protein complex to chlorophyll. Phycocyanin absorbs orange and red light at approximately 620nm and fluoresces at about 650nm depending on the species (10). This is particularly interesting because orange and red light are typically absorbed within the first 50m of a water column (11). From our data in Fig 5 & 6, it was found that there are significant differences in the abundance of Cyanobacteria across the Saanich Inlet depth profiles in both the mothur and QIIME2 pipelines. It is likely that this significance exists as a result of Cyanobacteria thriving at the upper boundaries of the water column, where they are still able to absorb red and orange light that is essential for Cyanobacterial photosynthesis. Furthermore, these findings are supported by the oxygen and fluorescence profiles across the water column (Fig 11). There is a significant difference in the concentration of oxygen and chlorophyll A across depth profiles. Higher concentrations of chlorophyll A and oxygen were found within the top 50m, which indicates increased photosynthetic activity. Moreover, there was a significant difference in the abundance of Cyanobacteria across oxygen concentrations and chlorophyll A concentrations for both pipelines; high oxygen and chlorophyll A concentrations were associated with a larger abundance. With Cyanobacterial photosynthesis contributing a substantial proportion of oxygen to Earth's atmosphere, it is not surprising that a high abundance of Cyanobacteria is associated with a high concentration of oxygen and chlorophyll A, and a shallow depth. Moreover, it has been reported that the growth rate of cyanobacteria is significantly influenced by temperature. Cyanobacteria were observed to have a lower growth rate at colder temperatures. For marine cyanobacteria, the optimal growth temperature range is 20 - 27.5^o^C; at these temperatures, cyanobacteria grow at a rate of 0.8 d^-1^  (12). When the temperature dropped to approximately 15oC, the growth rate of cyanobacteria slowed to 0.22 d^-1^. Interestingly, when temperature dropped below 10^o^C, cyanobacterial growth rates came to a complete stop (13). Therefore, in our study, the decline of cyanobacteria abundance with depth may at least partly attributed to the decreasing temperature. According temperature data for each sample, the temperature is close to 13^o^C at 10m, and decreases to about 9^o^C when at depths below 100m. Hence, the growth rate of cyanobacteria at depths below 100m is substantially slower than the growth rate at the water's surface. This leads to a lower abundance at lower depths.  
+The significant differences for Cyanobacteria abundance across depth and oxygen may be caused by photosynthesis and water temperature. Bacteria of the phylum Cyanobacteria obtain their energy through photosynthesis. These phototrophs are characterized by phycocyanin, a bluish pigment, which functions as an auxiliary light-harvesting protein complex to chlorophyll. Phycocyanin absorbs orange and red light at approximately 620nm and fluoresces at about 650nm depending on the species (10). This is particularly interesting because orange and red light are typically absorbed within the first 50m of a water column (11). From our data in Fig 5 & 6, it was found that there are significant differences in the abundance of Cyanobacteria across the Saanich Inlet depth profiles in both the mothur and QIIME2 pipelines. It is likely that this significance exists as a result of Cyanobacteria thriving at the upper boundaries of the water column, where they are still able to absorb red and orange light that is essential for Cyanobacterial photosynthesis. Furthermore, these findings are supported by the oxygen and fluorescence profiles across the water column (Fig 11). There is a significant difference in the concentration of oxygen and chlorophyll A across depth profiles. Higher concentrations of chlorophyll A and oxygen were found within the top 50m, which indicates increased photosynthetic activity. Moreover, there was a significant difference in the abundance of Cyanobacteria across oxygen concentrations and chlorophyll A concentrations for both pipelines; high oxygen and chlorophyll A concentrations were associated with a larger abundance. With Cyanobacterial photosynthesis contributing a substantial proportion of oxygen to Earth's atmosphere, it is not surprising that a high abundance of Cyanobacteria is associated with a high concentration of oxygen and chlorophyll A, and a shallow depth. Moreover, it has been reported that the growth rate of cyanobacteria is significantly influenced by temperature. Cyanobacteria were observed to have a lower growth rate at colder temperatures. For marine cyanobacteria, the optimal growth temperature range is 20 - 27.5^o^C; at these temperatures, cyanobacteria grow at a rate of 0.8 d^-1^  (12). When the temperature dropped to approximately 15^o^C, the growth rate of cyanobacteria slowed to 0.22 d^-1^. Interestingly, when temperature dropped below 10^o^C, cyanobacterial growth rates came to a complete stop (13). Therefore, in our study, the decline of cyanobacteria abundance with depth may at least partly attributed to the decreasing temperature. According temperature data for each sample, the temperature is close to 13^o^C at 10m, and decreases to about 9^o^C when at depths below 100m. Hence, the growth rate of cyanobacteria at depths below 100m is substantially slower than the growth rate at the water's surface. This leads to a lower abundance at lower depths.  
 
 Implications of potential differences in pipelines for microbial ecology make it difficult to make conclusive statements in research and discovery, since we become unable to differentiate actual biological differences seen and differences due to a particular pipeline being used. This could also suggest that one pipeline is more suited to the dataset. In fact, this difference could also be exploited, and manipulated so that a pipeline is selected based on the results that it gives, rather than the more appropriate pipeline for the given dataset.  
 
@@ -545,12 +566,6 @@ ggplot(nutrient,aes(x=Depth_m,y=uM))+
   theme(plot.caption = element_text(hjust=0.5, size=rel(0.8)))
 ```
 
-```{r, echo=FALSE}
-# Linear model of fluorescence across depth
-sam_data%>%
-  lm(Fluorescence_mgm_3~Depth_m,.)%>%
-  summary()
-```
 
 ####References
 
