@@ -74,7 +74,7 @@ q.perc = transform_sample_counts(q.norm, function(x) 100 * x/sum(x))
 
 **Alpha-diversity comparison:**   
 *Mothur*  
-As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220µM. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
+As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220?M. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
 
 *QIIME2*  
 The trends of Shannon's diversity index across depth and oxygen based on QIIME2 data are similar to those of mothur data. However, QIIME2 pipeline produces higher Shannon's diversity index than mothur does. Shannon's diversity index increases from 2.9-5.2 at oxygen concentrations of 0-40$\mu$M and decreases from 5.2-5.1 at oxygen concentrations of 40-200m. Figure 2 shows that Shannon's diversity index is higher in oxic conditions (4.80 ± 0.43) than anoxic conditions (3.15 ± 0.18).  
@@ -194,7 +194,7 @@ kable(q.avg_std,captio="Table 2. Average and standard deviation of alpha-diversi
 
 ```
 
-**Taxa presence and abundance:**  
+**Taxa presence and abundance:**   
 *Mothur*  
 31 taxa in the phylum level are detected by mothur pipeline (Figure 3). These taxa, however, have abundance at different magnitudes. Among of them, Proteobacteria is the most predominant phylum in all samples with the highest average abundance over 75. On the contrary, phylum Peregrinlbacteria has abundance no larger than 0.001 in the seven samples (Figure 3). Additionally, different taxa have distinct changes in abundance across depth. For instance, both Thaumarchaeota and Verrucomicrobia reach their maximum abundance at depth of 100m and and gradually decrease in abundance until 200m, while Latescibacteria and Fibrobacteres are almost undetectable in shallow water and their abundances increase dramatically at depth of 200m.  
 
@@ -570,9 +570,9 @@ ggplot(nutrient,aes(x=Depth_m,y=uM))+
 ####References
 
 1. Walsh DA, Zaikova E, Howes CG, Song YC, Wright JJ, Tringe SG, Hallam SJ. 2009. Metagenome of a versatile chemolithoautotroph from expanding oceanic dead zones. Science 326(5952): 578-582.  
-2. Torres-Beltrán M, Hawley AK, Capelle D, Zaikova E, Walsh DA., Mueller A, Finke J. 2017. A compendium of geochemical information from the Saanich Inlet water column. Nature scientific data 4(170159).  
-3. Hawley AK, Torres-Beltrán M, Zaikova E, Walsh DA, Mueller A, Scofield M, Kheirandish S, Payne C, Pakhomova L, Bhatia M, Shevchek O, Gies EA, Fairley D, Malfatii SA, Norbeck AD, Brewer HM, Pasa-Tolic, L, del Rio TG, Suttle CA, Trige S, Hallam SJ. Data Descriptor: A compendium of multi-omic sequence information from the Saanich Inlet water column. Nature scientific data 4(170160).  
-4. Hallam SJ, Torres-Beltrán M, Hawley AK. Comment: Monitoring microbial responses to ocean deoxygenation in a model oxygen minimum zone. Nature scientific data 4(170158).  
+2. Torres-Beltr?n M, Hawley AK, Capelle D, Zaikova E, Walsh DA., Mueller A, Finke J. 2017. A compendium of geochemical information from the Saanich Inlet water column. Nature scientific data 4(170159).  
+3. Hawley AK, Torres-Beltr?n M, Zaikova E, Walsh DA, Mueller A, Scofield M, Kheirandish S, Payne C, Pakhomova L, Bhatia M, Shevchek O, Gies EA, Fairley D, Malfatii SA, Norbeck AD, Brewer HM, Pasa-Tolic, L, del Rio TG, Suttle CA, Trige S, Hallam SJ. Data Descriptor: A compendium of multi-omic sequence information from the Saanich Inlet water column. Nature scientific data 4(170160).  
+4. Hallam SJ, Torres-Beltr?n M, Hawley AK. Comment: Monitoring microbial responses to ocean deoxygenation in a model oxygen minimum zone. Nature scientific data 4(170158).  
 5. National Research Council. 2007. The new science of metagenomics: revealing the secrets of our microbial planet. National Academies Press, Washington, DC.  
 6. Bowers RM, Kyrpides NC, Stepanauskas R, Harmon-Smith M, Doud D, Reddy TBK, Tringe SG. 2017. Minimum information about a single amplified genome (MISAG) and a metagenome-assembled genome (MIMAG) of bacteria and archaea. Nature Biotechnology 35: 725-731.  
 7. Falkowski PG, Fenchel T, Delong EF. 2008. The microbial engines that drive Earth's biogeochemical cycles. Science 320(5879): 1034-1039.  
