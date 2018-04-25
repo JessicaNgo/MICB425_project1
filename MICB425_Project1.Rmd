@@ -74,10 +74,10 @@ q.perc = transform_sample_counts(q.norm, function(x) 100 * x/sum(x))
 
 **Alpha-diversity comparison:**   
 *Mothur*  
-As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220?M. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
+As shown in Figure 1, alpha-diversity by Shannon's diversity index based on mothur shows an overall decreasing trend as depth increases. Specifically, a stable trend is observed from depths of 0-100m, starts decreasing at 100-150m and stabilizes at 150-200m. Figure 1 also shows an overall increasing trend as oxygen increases. Specifically, Shannon's diversity index increases from 2.3-4.25 at oxygen concentrations of 0-40$\mu$M and decreases from 4.25-3.9 at oxygen concentrations of 40-220$\mu$M. It was also observed that Shannon's diversity index is higher in oxic conditions (3.84 ± 0.45) than anoxic conditions (2.39 ± 0.07).  
 
 *QIIME2*  
-The trends of Shannon's diversity index across depth and oxygen based on QIIME2 data are similar to those of mothur data. However, QIIME2 pipeline produces higher Shannon's diversity index than mothur does. Shannon's diversity index increases from 2.9-5.2 at oxygen concentrations of 0-40$\mu$M and decreases from 5.2-5.1 at oxygen concentrations of 40-200m. Figure 2 shows that Shannon's diversity index is higher in oxic conditions (4.80 ± 0.43) than anoxic conditions (3.15 ± 0.18).  
+The trends of Shannon's diversity index across depth and oxygen based on QIIME2 data are similar to those of mothur data. However, QIIME2 pipeline produces higher Shannon's diversity index than mothur does. Shannon's diversity index increases from 2.9-5.2 at oxygen concentrations of 0-40$\mu$M and decreases from 5.2-5.1 at oxygen concentrations of 40-200$\mu$M. Figure 2 shows that Shannon's diversity index is higher in oxic conditions (4.80 ± 0.43) than anoxic conditions (3.15 ± 0.18).  
 
 ######Alpha-diversity of mothur data
 ```{r, echo=FALSE, "Question 1a_1", fig.width=14, fig.height=10}
